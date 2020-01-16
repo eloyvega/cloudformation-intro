@@ -1,0 +1,40 @@
+Parameters:
+  NameOfInstance:
+    Description: "Nombre del servidor"
+    Type: String
+  KeyName:
+    Description: "Nombre de la llave privada SSH para la instancia EC2"
+    Type: AWS::EC2::KeyPair::KeyName
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-0b69ea66ff7391e80
+    us-west-2:
+      AMI: ami-04b762b4289fba92b
+
+Resources:
+  Ec2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap:
+          - RegionMap
+          - !Ref AWS::Region
+          - AMI
+      Tags:
+        - Key: "Name"
+          Value: !Ref NameOfInstance
+      SecurityGroups: 
+        - !Ref MySecurityGroup
+      KeyName: !Ref KeyName
+  MySecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SSH on port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
